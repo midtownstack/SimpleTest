@@ -1,0 +1,241 @@
+<html>
+
+<head>
+  <title>Simple Test</title>
+    <script src="json2.js"></script> 
+  <script src="jquery.js"></script>
+  <script src="underscore.js"></script>
+  <script src="backbone.js"></script>
+  <script src="sync.js"></script>
+<script type="text/javascript" src="coffee-script.js"> </script> 
+
+</head>
+
+</head>
+<body>
+	<style>
+	    body{ margin:0; padding:0; background:#DADADA; padding-top:20px;}
+		.main{
+			background-color:white;
+			width:900px;
+			margin-top:35px;
+			padding:0 0;
+			margin:auto;
+			height:600px;
+			font-family:Arial, Helvetica, sans-serif;
+			border:12px solid #28608D;
+			-webkit-border-radius: 10px;
+			border-radius: 10px; 
+		}
+		.main strong{
+			font-size:13px;
+			font-weight:400;
+			color:#f00;
+			padding:25px 25px 0;
+			margin-top:10px;
+			display:block
+		}
+		.main h2{ text-align:center; font-size:24px; background:#28608D; padding:20px 0; margin:0; color:#fff}
+		#display{ padding:0 25px;}
+		#display form{ margin-left:35px;font-size:14px;}
+		#display p{ font-size:16px;}
+	</style>
+
+<script type = "text/coffeescript">
+$aa = []
+$i = 0
+$j = 0
+$att = 0
+SimpleSample = {}
+SimpleSample.DisplayView = Backbone.View.extend(
+  el: "#display"
+  events:
+    "click #reset-button": "reset"
+
+  initialize: ->
+
+  reset: ->
+    p = this
+    ar = $("#edit-form").find(":checkbox")
+    i = 0
+
+    while i < ar.length
+      p.collection.models[i].attributes.user_answer = ar[i].checked
+      i++
+    console.log p
+)
+SimpleSample.Person = Backbone.Model.extend(defaults:
+  id: 0
+  question: ""
+  answer: true
+  user_answer: false
+)
+SimpleSample.Person1 = Backbone.Collection.extend(model: SimpleSample.Person)
+ContactView = Backbone.View.extend(
+  template: _.template($("#template-contact").html())
+  el: "#display"
+  initialize: ->
+    html = @template(@collection)
+    $(@el).html html
+)
+ResultView = Backbone.View.extend(
+  template: _.template($("#template-generate").html())
+  el: "#result-val"
+  result: 0
+  initialize: ->
+    p = this
+    j = 0
+    dict = @collection.models
+    r = $i - 1
+    while r >= 0
+      $j = $j + 1  if $aa[r] is p.collection.models[r].attributes.answer
+      r = r - 1
+    @result = $j
+    console.log($j)
+    html = @template(@collection)
+    $(@el).html html
+)
+SimpleSample.FormView = Backbone.View.extend(
+  el: "#edit-form"
+  tagName: "p"
+  initialize: ->
+    b = this
+    
+    # this.template = _.template('<p><%= this %></p>');
+    _.each @collection.models, (model) ->
+      console.log model.attributes.question
+      $(b.el).append model.attributes.question
+      $(b.el).append "<input class ='tc' type='checkbox'></input>"
+      $(b.el).append "<p></p>"
+
+    console.log this
+    
+    # Backbone.ModelBinding.call(this);
+    @render()
+    return
+)
+class SimpleSample.App 
+  start : ->
+    question1 = new SimpleSample.Person()
+    question2 = new SimpleSample.Person()
+    question3 = new SimpleSample.Person()
+    question4 = new SimpleSample.Person()
+    question1.set
+      question: "Backbone.js is flexible to generate views"
+      answer: "true"
+      id: 1
+
+    question2.set
+      question: "Rails is a scripting language"
+      answer: "false"
+      id: 2
+
+    question3.set
+      question: "Ruby programmers can't survive without ruby gems"
+      answer: "false"
+      id: 3
+
+    question4.set
+      question: "CoffeeScript compiles down to JavaScript"
+      answer: "true"
+      id: 4
+
+    at = new SimpleSample.Person1([question1, question2, question3, question4])
+    console.log at
+    $att=at
+    
+    #	    var formView = new SimpleSample.FormView({collection: at});
+    #	var displayView = new SimpleSample.DisplayView({collection:at});
+    new ContactView(collection: at)
+$ ->
+  app = new SimpleSample.App()
+  app.start()
+  $(".one").click ->
+    a = $(this).closest("form").attr("id")
+    r = $("#" + a + "").find("input[type=hidden]")
+    r1 = $("#" + a + "").find("input[type=radio]")
+    r[0].value = @value
+    $aa[$i] = @value
+    $i = $i + 1
+    r1.each ->
+      $(this).unbind()
+      $(this).attr "disabled", "disabled"
+
+    $("#f" + a + "").css "display", "block"
+    new ResultView(collection: $att,result:$j)  if $i is 4
+
+# person.set({first_name: "joe", last_name: "bob"});
+
+
+</script>
+
+
+
+
+	<script type="text/html" id="template-contact">
+
+<div>
+		<p> 1) <%=  this.collection.models[0].attributes.question%></p>
+		<form id="f1">
+		     True:	<input type="radio" class ="one" name="one" value="true">
+		     False:	<input type="radio" class="one" name="one" value="false">
+		     <input type="hidden" value="1">
+		</form>
+	</div>
+        <div style="display:none" id="ff1">
+		<p>2) <%=  this.collection.models[1].attributes.question%></p>
+		<form id="f2">
+		     True:	<input type="radio" class="one" name="twe" value="true">
+		    False:	<input type="radio" class= "one" name="twe" value="false">
+		     <input type="hidden" value="1">
+		</form>
+	</div>
+        <div  id="ff2" style="display:none">
+		<p>3) <%=  this.collection.models[2].attributes.question%></p>
+		<form id="f3">
+		     True:	<input type="radio" class = "one" name="the" value="true">
+		    False:	<input type="radio" class= "one" name="the" value="false">
+		     <input type="hidden" value="1">
+		</form>
+	</div>
+ <div  id="ff3" style="display:none">
+		<p>4) <%= this.collection.models[3].attributes.question%></p>
+		<form id="f4">
+		     True:	<input type="radio" class = "one" name="the" value="true">
+		    False:	<input type="radio" class= "one" name="the" value="false">
+		     <input type="hidden" value="1">
+		</form>
+	</div>
+
+
+
+
+
+
+</script>
+
+<script type="text/html" id="template-generate">
+	<p></p>
+	<hr>
+	
+	<p></p>
+	<p style="float:left;height:30px;line-height:30px;padding:0 25px;"><b>Thank you for attending this test, your score is: <span style="padding:4px 10px;background:#595d5f;color:#fff"><%= this.result %></span></b></p>
+	<div style="padding:0 25px;width:100%;clear:both">
+	  <p style="float:left;padding:5px 15px;border:1px solid #ccc;margin-right:10px;">Key</p>
+	<% _.each(this.collection.models, function(model) { %>
+		<p style="float:left;height:30px;line-height:30px;padding-right:10px;background:#f5f5f5;margin-right:10px;padding:0 8px;border:1px solid #ccc"><%= model.attributes.id%>) <%= model.attributes.answer%></p>
+ <% }); %>
+ </div>
+
+
+</script>
+<div class ='main'>
+<h2>Simple Test</h2>
+	<strong>Instructions: This test contains 4 true/false questions. Answers cannot be modified once you choose an option.</strong>
+<div id="display">
+    <button id="reset-button">Submit</button>
+</div>
+<div id="result-val"></div>
+</div>
+</body>
+</html>
